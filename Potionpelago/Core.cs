@@ -16,36 +16,11 @@ public class Core : MelonMod
     public static APGui APGui = new();
     public static MainMenuUI MainMenuUI;
 
-    // CharacterInventory
-
     public override void OnInitializeMelon()
     {
         Log = LoggerInstance;
 
         HarmonySetup.Init(MelonAssembly.Assembly, HarmonyInstance);
-
-        // KeyRegistry.TryAddKey(
-        //     KeyCode.P, Key.P, () =>
-        //     {
-        //         var data = PotionPatch.Potions.Values.ToArray();
-        //         Dictionary<PotionCategoryType, HashSet<SortingPuzzleType>> dict = [];
-        //
-        //         foreach (var potion in data)
-        //         {
-        //             if (!dict.TryGetValue(potion.Color, out var list)) dict[potion.Color] = list = [];
-        //             list.Add(potion.Puzzle);
-        //         }
-        //
-        //         File.WriteAllLines(
-        //             "Puzzles.txt",
-        //             dict.SelectMany(kv => kv.Value.Select(p
-        //                     => $"{PotionPatch.PotionTypeToName[kv.Key]}|{PotionPatch.PuzzleTypeToName[p]}"
-        //                 )
-        //             )
-        //         );
-        //     }
-        // );
-
         PotionClient.Init();
 
         Log.Msg("Initialized.");
@@ -58,7 +33,6 @@ public class Core : MelonMod
 
     public override void OnUpdate()
     {
-        KeyRegistry.Update();
         if (EventPatch.CurrentEvent is EventTypes.GameStart or EventTypes.GameResume or EventTypes.GamePause)
             PotionClient.Update();
     }

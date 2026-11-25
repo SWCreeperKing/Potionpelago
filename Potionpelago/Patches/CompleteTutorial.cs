@@ -6,8 +6,6 @@ namespace Potionpelago.Patches;
 [PatchAll]
 public static class CompleteTutorial
 {
-    // [HarmonyPatch(typeof(TutorialManager), "Start"), HarmonyPostfix]
-    // public static void FinishTutorial(TutorialManager __instance)
     [HarmonyPatch(typeof(TutorialManager), "StartTutorial"), HarmonyPostfix]
     public static void FinishTutorial(TutorialManager __instance)
     {

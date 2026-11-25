@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
-using Potionpelago.Archipelago;
 using Potionpelago.CopyPastas;
+using static Potionpelago.Archipelago.PotionClient;
 
 namespace Potionpelago.Patches;
 
@@ -11,8 +11,8 @@ public class ShelvePatch
     public static void FinishPuzzle(ShelfController __instance, ref bool __result)
     {
         if (!__result) return;
-        PotionClient.SendLocation(
-            $"Complete {PotionPatch.PotionTypeToName[__instance.cabinetController.potionCategoryType]} Potions: {PotionPatch.PuzzleTypeToName[__instance.shelfSortingPuzzleType]} Puzzle"
+        SendLocation(
+            $"Complete {PotionTypeToName[__instance.cabinetController.potionCategoryType]} Potions: {PuzzleTypeToName[__instance.shelfSortingPuzzleType]} Puzzle"
         );
     }
 }

@@ -5,7 +5,7 @@ namespace Potionpelago.Archipelago;
 public static class ItemHandler
 {
     public static HashSet<string> ItemsUnlocked = [];
-    public static bool UpdatePotions = false;
+    public static bool UpdatePotions;
 
     public static void HandleItem(ItemInfo item)
     {

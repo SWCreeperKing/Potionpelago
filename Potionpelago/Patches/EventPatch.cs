@@ -9,9 +9,5 @@ public static class EventPatch
     public static EventTypes CurrentEvent;
 
     [HarmonyPatch(typeof(EventManager), "ActivateEvent"), HarmonyPrefix]
-    public static void Events(EventTypes x)
-    {
-        CurrentEvent = x;
-        // Core.Log.Msg($"Event: [{CurrentEvent}]");
-    }
+    public static void Events(EventTypes x) => CurrentEvent = x;
 }

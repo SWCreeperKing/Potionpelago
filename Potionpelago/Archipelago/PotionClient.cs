@@ -3,16 +3,39 @@ using CreepyUtil.Archipelago;
 using CreepyUtil.Archipelago.ApClient;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
-using Potionpelago.CopyPastas;
-using Potionpelago.Patches;
-using UnityEngine;
 using static Potionpelago.Archipelago.ItemHandler;
-using static Potionpelago.Patches.PotionPatch;
 
 namespace Potionpelago.Archipelago;
 
 public static class PotionClient
 {
+    public static Dictionary<PotionCategoryType, string> PotionTypeToName = new()
+    {
+        [PotionCategoryType.Healing] = "Red", [PotionCategoryType.Stamina] = "Lime", [PotionCategoryType.Mana] = "Blue",
+        [PotionCategoryType.Poison] = "Purple", [PotionCategoryType.Fire] = "Orange", [PotionCategoryType.Ice] = "Cyan",
+        [PotionCategoryType.Lightning] = "Yellow", [PotionCategoryType.Earth] = "Brown",
+        [PotionCategoryType.Holy] = "Beige", [PotionCategoryType.Charm] = "Pink", [PotionCategoryType.Stealth] = "Gray",
+        [PotionCategoryType.Necromancy] = "Black", [PotionCategoryType.Nature] = "Green",
+    };
+
+    public static Dictionary<SortingPuzzleType, string> PuzzleTypeToName = new()
+    {
+        [SortingPuzzleType.PotionSize_5] = "Size", [SortingPuzzleType.PotionLiquidSize_5] = "Liquid",
+        [SortingPuzzleType.PotionCorkSize_5] = "Cork", [SortingPuzzleType.BasicNumbers_5] = "Number",
+        [SortingPuzzleType.Animals_5] = "Animal", [SortingPuzzleType.CrowInteraction_5] = "Crow",
+        [SortingPuzzleType.Spices_5] = "Spice", [SortingPuzzleType.Flowers_8] = "Flower",
+        [SortingPuzzleType.ItemsInPotion_8] = "Content", [SortingPuzzleType.RomanNumerals_8] = "Numeral",
+        [SortingPuzzleType.MoonsShapes_8] = "Moon", [SortingPuzzleType.Compass_8] = "Compass",
+        [SortingPuzzleType.Clock_8] = "Clock", [SortingPuzzleType.GeometricShapes_8] = "Shape",
+        [SortingPuzzleType.Chess_8] = "Chess", [SortingPuzzleType.MusicNotes_8] = "Notes",
+        [SortingPuzzleType.LightInteraction_8] = "Candle", [SortingPuzzleType.MusicInteraction_8] = "Music",
+        [SortingPuzzleType.WeightInteraction_8] = "Weight", [SortingPuzzleType.ChemicalGrades_8] = "Chemical",
+        [SortingPuzzleType.PotionParticles_8] = "Crystal", [SortingPuzzleType.IngredientPrice_8] = "Ingredient",
+        [SortingPuzzleType.Cards_8] = "Card", [SortingPuzzleType.Weather_8] = "Weather",
+        [SortingPuzzleType.Elements_8] = "Element", [SortingPuzzleType.GibberishLanguage_8] = "Greek",
+        [SortingPuzzleType.Rainbow_8] = "Color", [SortingPuzzleType.HeroAdventure_8] = "Adventure",
+    };
+    
     public static ApClient Client = new(new TimeSpan(0, 1, 0));
     public static ApData Data = new();
     public static string GameUUID = "";
