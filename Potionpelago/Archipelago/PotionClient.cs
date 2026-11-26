@@ -110,7 +110,6 @@ public static class PotionClient
                 go.GetComponent<CapsuleCollider>().enabled = active;
                 foreach (var child in go.GetChildren()) child.SetActive(active);
             }
-            Core.Log.Msg($"Size: [{SceneSingleton<PotionsManager>.Instance.potionControllersList.Count}]");
             UpdatePotions = false;
         }
         catch (Exception e) { Core.Log.Error(e); }

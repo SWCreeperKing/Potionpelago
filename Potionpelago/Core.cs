@@ -16,8 +16,7 @@ public class Core : MelonMod
     public static MelonLogger.Instance Log;
     public static APGui APGui = new();
     public static MainMenuUI MainMenuUI;
-    public static Inspector Inspector = new();
-    
+
     public override void OnInitializeMelon()
     {
         Log = LoggerInstance;
@@ -30,23 +29,21 @@ public class Core : MelonMod
 
     public override void OnGUI()
     {
-        Inspector.Render();
-        if (EventPatch.CurrentEvent is EventTypes.MainMenuLoaded)
+        if (EventPatch.CurrentEvent is not EventTypes.MainMenuLoaded) return;
+        if (PotionClient.QuitToMainMenu)
         {
-            if (PotionClient.QuitToMainMenu)
-            {
-                PotionClient.QuitToMainMenu = false;
-                PotionClient.Client.TryDisconnect();
-                OverrideSaveFile();
-            }
-            APGui.Render();
+            PotionClient.QuitToMainMenu = false;
+            PotionClient.Client.TryDisconnect();
+            OverrideSaveFile();
         }
+        APGui.Render();
     }
 
     public override void OnUpdate()
     {
-        if (EventPatch.CurrentEvent is EventTypes.GameStart or EventTypes.GameResume or EventTypes.GamePause)
-            PotionClient.Update();
+        if (EventPatch.CurrentEvent is not (EventTypes.GameStart or EventTypes.GameResume or EventTypes.GamePause))
+            return;
+        PotionClient.Update();
     }
 
     public static void MainMenuStart()
@@ -55,14 +52,15 @@ public class Core : MelonMod
         {
             MainMenuUI ??= Object.FindAnyObjectByType<MainMenuUI>();
             MainMenuUI.CallPrivateMethod("Start");
-        } catch {}
+        }
+        catch { }
     }
 
     public static void OverrideSaveFile(string saveDir = "")
     {
         SaveDirPatch.SaveDir = saveDir;
         try { Singleton<SaveSystem>.Instance.CallPrivateMethod("OnEnable"); }
-        catch {}
+        catch { }
         MainMenuStart();
         UIBackKeyManager.ClearQueue();
         PlayerPrefs.SetInt("OpenMainMenu", 1);
