@@ -17,17 +17,25 @@ public class Inspector(bool keyboardInput = false) : GuiBuilder
     public ScrollWindow ObjectView;
     public int RootSelected = 0;
     public int InspectSelected = 0;
+    public string Title = "";
 
     protected override void InitGUI()
     {
+        SceneView = new ScrollWindow(50, 50, 240, 400, new TextRef(() => Title), dragable: true);
+        ObjectView = new ScrollWindow(
+            500, 50, 500, 540, new TextRef(() => $"View [{CurrentObj?.name}]"), dragable: true
+        );
+
         SceneManager.activeSceneChanged += (cur, next) => Cached = false;
         KeyRegistry.TryAddKey(KeyCode.Z, Key.Z, () => Show = !Show);
         KeyRegistry.TryAddKey(KeyCode.Delete, Key.Delete, () => Cached = false);
-        KeyRegistry.TryAddKey(KeyCode.Backslash, Key.Backslash, () =>
-        {
-            GrabDontDestroy = !GrabDontDestroy;
-            Cached = false;
-        });
+        KeyRegistry.TryAddKey(
+            KeyCode.Backslash, Key.Backslash, () =>
+            {
+                GrabDontDestroy = !GrabDontDestroy;
+                Cached = false;
+            }
+        );
         KeyRegistry.TryAddKey(KeyCode.F5, Key.F5, ToggleMouse);
 
         if (!keyboardInput) return;
@@ -46,7 +54,7 @@ public class Inspector(bool keyboardInput = false) : GuiBuilder
         if (!Cached)
         {
             Scene scene;
-            
+
             if (!GrabDontDestroy) scene = SceneManager.GetActiveScene();
             else
             {
@@ -55,10 +63,11 @@ public class Inspector(bool keyboardInput = false) : GuiBuilder
                 scene = temp.scene;
                 Object.DestroyImmediate(temp);
             }
-            
+
             RootObjects = scene.GetRootGameObjects();
 
-            SceneView = new ScrollWindow(50, 50, 240, 400, $"Scene View [{scene.name}]", dragable: true);
+            Title = $"Scene View [{scene.name}]";
+            SceneView.Children.Clear();
             for (var i = 0; i < RootObjects.Length; i++)
             {
                 var i1 = i;
@@ -78,17 +87,13 @@ public class Inspector(bool keyboardInput = false) : GuiBuilder
             }
 
             Cached = true;
-            ObjectView = null;
             CurrentObj = null;
         }
 
-        SceneView?.Render();
-        try { ObjectView?.Render(); }
-        catch (NullReferenceException)
-        {
-            ObjectView = null;
-            CurrentObj = null;
-        }
+        SceneView.Render();
+        if (CurrentObj is null) return;
+        try { ObjectView.Render(); }
+        catch (NullReferenceException) { CurrentObj = null; }
     }
 
     public void InspectObject(int obj)
@@ -106,10 +111,9 @@ public class Inspector(bool keyboardInput = false) : GuiBuilder
         if (obj is null) return;
         InspectSelected = 0;
         CurrentObj = obj;
-
         var parent = obj.transform.parent is not null ? obj.GetParent() : null;
-        ObjectView = new ScrollWindow(500, 50, 400, 400, $"View [{obj.name}]", dragable: true);
 
+        ObjectView.Children.Clear();
         if (!keyboardInput)
         {
             if (parent is not null) ObjectView.AddChild(new UiButton("View Parent", 30, () => InspectObject(parent)));
@@ -131,7 +135,18 @@ public class Inspector(bool keyboardInput = false) : GuiBuilder
                             ),
                         new ScrollBox(scrollH)
                            .AddChildren(
-                                [.. obj.GetComponents<MonoBehaviour>().Select(c => new Label(c.GetType().Name, 30))]
+                                [
+                                    .. obj.GetComponents<Component>().Select(IGuiElement (c) =>
+                                        {
+                                            if (c is Behaviour b)
+                                                return new Toggle(
+                                                    new SetterGetter<bool>(() => b.enabled, v => b.enabled = v),
+                                                    c.GetType().FullName, 30
+                                                );
+                                            return new Label(c.GetType().FullName, 30);
+                                        }
+                                    )
+                                ]
                             )
                     )
             );
@@ -146,7 +161,8 @@ public class Inspector(bool keyboardInput = false) : GuiBuilder
 
                 objScroll.AddChild(
                     new Label(
-                        new TextRef(() => InspectSelected % InspectObjects.Length == i1 ? $"> {InspectObjects[i1].name} <"
+                        new TextRef(() => InspectSelected % InspectObjects.Length == i1
+                            ? $"> {InspectObjects[i1].name} <"
                             : $"  {InspectObjects[i1].name}  "
                         ), 30
                     )
@@ -173,8 +189,7 @@ public class Inspector(bool keyboardInput = false) : GuiBuilder
 
         switch (dir)
         {
-            case 0 when ObjectView is not null:
-                ObjectView = null;
+            case 0 when CurrentObj is not null:
                 CurrentObj = null;
                 InspectSelected = 0;
                 break;
@@ -190,12 +205,12 @@ public class Inspector(bool keyboardInput = false) : GuiBuilder
             case 6 when ObjectView is not null && CurrentObj.transform.parent is not null:
                 InspectObject(CurrentObj.GetParent()); break;
         }
-        
+
         var max = ObjectView is null ? RootObjects.Length : InspectObjects.Length;
         if (RootSelected == -1) RootSelected = max - 1;
         if (RootObjects.Length is 0) RootSelected = 0;
         else RootSelected %= RootObjects.Length;
-        
+
         if (ObjectView is null) return;
         if (InspectSelected == -1) InspectSelected = max - 1;
         if (InspectObjects.Length is 0) InspectSelected = 0;

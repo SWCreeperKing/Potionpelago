@@ -3,7 +3,10 @@ using CreepyUtil.Archipelago;
 using CreepyUtil.Archipelago.ApClient;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using Potionpelago.CopyPastas;
+using UnityEngine;
 using static Potionpelago.Archipelago.ItemHandler;
+using Object = UnityEngine.Object;
 
 namespace Potionpelago.Archipelago;
 
@@ -35,7 +38,9 @@ public static class PotionClient
         [SortingPuzzleType.Elements_8] = "Element", [SortingPuzzleType.GibberishLanguage_8] = "Greek",
         [SortingPuzzleType.Rainbow_8] = "Color", [SortingPuzzleType.HeroAdventure_8] = "Adventure",
     };
-    
+
+    public static bool QuitToMainMenu = false;
+
     public static ApClient Client = new(new TimeSpan(0, 1, 0));
     public static ApData Data = new();
     public static string GameUUID = "";
@@ -92,16 +97,20 @@ public static class PotionClient
             Client.UpdateItemHandler();
 
             if (!UpdatePotions) return;
-            // foreach (var pd in Potions.Values)
+
             foreach (var pc in SceneSingleton<PotionsManager>.Instance.potionControllersList)
             {
-                pc.gameObject.SetActive(
+                var go = pc.gameObject;
+                var active =
                     ItemsUnlocked.Contains($"Unlock {PotionTypeToName[pc.potionCategoryType]} Potions")
-                    && ItemsUnlocked.Contains($"Unlock {PuzzleTypeToName[pc.sortingPuzzleType]} Puzzles")
-                );
-                // Core.Log.Msg($"[{PotionTypeToName[pd.Color]}] - [{PuzzleTypeToName[pd.Puzzle]}] : [{pd.Controller.gameObject.activeSelf}]");
+                    && ItemsUnlocked.Contains($"Unlock {PuzzleTypeToName[pc.sortingPuzzleType]} Puzzles");
+
+                go.GetComponent<MeshRenderer>().enabled = active;
+                go.GetComponent<PotionController>().enabled = active;
+                go.GetComponent<CapsuleCollider>().enabled = active;
+                foreach (var child in go.GetChildren()) child.SetActive(active);
             }
-            // Core.Log.Msg($"[{Potions.Count}] ({Potions.Values.Count(pd => pd.Controller.gameObject.activeSelf)})");
+            Core.Log.Msg($"Size: [{SceneSingleton<PotionsManager>.Instance.potionControllersList.Count}]");
             UpdatePotions = false;
         }
         catch (Exception e) { Core.Log.Error(e); }

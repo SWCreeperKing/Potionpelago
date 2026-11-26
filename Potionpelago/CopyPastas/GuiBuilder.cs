@@ -1,6 +1,13 @@
 using UnityEngine;
+using static Potionpelago.CopyPastas.GUIStatic;
 
 namespace Potionpelago.CopyPastas;
+
+public static class GUIStatic
+{
+    private static int GlobalId = 1;
+    public static int GetNewId() => ++GlobalId;
+}
 
 public abstract class GuiBuilder
 {
@@ -18,19 +25,20 @@ public abstract class GuiBuilder
         }
 
         try { OnGUI(); }
+        catch (InvalidOperationException) {}
         catch (Exception e) { Core.Log.Error(e); }
     }
-}
+    }
 
 public class ScrollWindow(float x, float y, float w, float h, TextRef title, float padding = 3,
     bool dragable = true)
     : GuiContainer<ScrollWindow>(x, y, w, title, padding, h)
 {
-    private static int Id = GetNewId();
     private static Rect DragSize = new(0, 0, 10000, 20);
     private Rect ScrollRect = new(0, 0, w + 40, h + 40);
     private Rect VisibleRect = new(0, 20, w, h);
     private Vector2 ScrollPos = Vector2.zero;
+    private int Id = GetNewId();
 
     protected override void SelfRender(Rect rect, string title) => SetRect(
         GUI.Window(
@@ -78,7 +86,6 @@ public class TitleBox(float x, float y, float w, TextRef title, float padding = 
 public abstract class GuiContainer<T>(float x, float y, float w, TextRef title, float padding = 3, float h = 0)
     where T : GuiContainer<T>
 {
-    private static int GlobalId = 0;
     public List<IGuiElement> Children = [];
 
     private Rect BoxRect = new(x, y, w, h);
@@ -116,7 +123,6 @@ public abstract class GuiContainer<T>(float x, float y, float w, TextRef title, 
         return (T)this;
     }
 
-    public static int GetNewId() => ++GlobalId;
 }
 
 public class HBox(float padding = 3) : IGuiElement
@@ -163,10 +169,12 @@ public class ScrollBox(int height, float padding = 3) : IGuiElement
 
     public void Render(ref float x, ref float y, float w)
     {
-        ScrollRect ??= new Rect(0, 0, w, height);
-        VisibleRect ??= new Rect(0, 0, w - 40, height - 40);
+        ScrollRect ??= new Rect(x, y, w, height);
+        // VisibleRect ??= new Rect(x, y, w - 40, height - 40);
+        VisibleRect ??= new Rect(x, y, w, height);
 
-        VisibleRect = VisibleRect.Value with { width = w + x - 40, height = height + y - 40 };
+        // VisibleRect = VisibleRect.Value with { width = w + x - 40, height = height + y - 40 };
+        // VisibleRect = VisibleRect.Value with { width = w, height = height + y - 40 };
         ScrollPos = GUI.BeginScrollView(VisibleRect.Value, ScrollPos, ScrollRect.Value);
 
         RenderChildren(x, y, w, true, out _, out _, out var h);

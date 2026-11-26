@@ -3,6 +3,7 @@ using Potionpelago.Archipelago;
 using Potionpelago.CopyPastas;
 using Potionpelago.Patches;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Object = UnityEngine.Object;
 
 [assembly: MelonInfo(typeof(Potionpelago.Core), "Potionpelago", "0.1.0", "SW_CreeperKing", null)]
@@ -15,7 +16,8 @@ public class Core : MelonMod
     public static MelonLogger.Instance Log;
     public static APGui APGui = new();
     public static MainMenuUI MainMenuUI;
-
+    public static Inspector Inspector = new();
+    
     public override void OnInitializeMelon()
     {
         Log = LoggerInstance;
@@ -28,7 +30,17 @@ public class Core : MelonMod
 
     public override void OnGUI()
     {
-        if (EventPatch.CurrentEvent is EventTypes.MainMenuLoaded) APGui.Render();
+        Inspector.Render();
+        if (EventPatch.CurrentEvent is EventTypes.MainMenuLoaded)
+        {
+            if (PotionClient.QuitToMainMenu)
+            {
+                PotionClient.QuitToMainMenu = false;
+                PotionClient.Client.TryDisconnect();
+                OverrideSaveFile();
+            }
+            APGui.Render();
+        }
     }
 
     public override void OnUpdate()
