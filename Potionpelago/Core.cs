@@ -3,7 +3,6 @@ using Potionpelago.Archipelago;
 using Potionpelago.CopyPastas;
 using Potionpelago.Patches;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using Object = UnityEngine.Object;
 
 [assembly: MelonInfo(typeof(Potionpelago.Core), "Potionpelago", "0.1.0", "SW_CreeperKing", null)]
